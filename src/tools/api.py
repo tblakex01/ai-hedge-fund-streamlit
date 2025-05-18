@@ -19,6 +19,18 @@ from src.data.models import (
 # Global cache instance
 _cache = get_cache()
 
+# Use a shared requests session for connection pooling
+session = requests.Session()
+DEFAULT_TIMEOUT = 10  # seconds
+
+
+def _get_api_headers() -> dict:
+    """Return headers with API key if available."""
+    headers = {}
+    if api_key := os.environ.get("FINANCIAL_DATASETS_API_KEY"):
+        headers["X-API-KEY"] = api_key
+    return headers
+
 
 def get_prices(ticker: str, start_date: str, end_date: str) -> list[Price]:
     """Fetch price data from cache or API."""
@@ -30,12 +42,10 @@ def get_prices(ticker: str, start_date: str, end_date: str) -> list[Price]:
             return filtered_data
 
     # If not in cache or no data in range, fetch from API
-    headers = {}
-    if api_key := os.environ.get("FINANCIAL_DATASETS_API_KEY"):
-        headers["X-API-KEY"] = api_key
+    headers = _get_api_headers()
 
     url = f"https://api.financialdatasets.ai/prices/?ticker={ticker}&interval=day&interval_multiplier=1&start_date={start_date}&end_date={end_date}"
-    response = requests.get(url, headers=headers)
+    response = session.get(url, headers=headers, timeout=DEFAULT_TIMEOUT)
     if response.status_code != 200:
         raise Exception(f"Error fetching data: {ticker} - {response.status_code} - {response.text}")
 
@@ -67,12 +77,10 @@ def get_financial_metrics(
             return filtered_data[:limit]
 
     # If not in cache or insufficient data, fetch from API
-    headers = {}
-    if api_key := os.environ.get("FINANCIAL_DATASETS_API_KEY"):
-        headers["X-API-KEY"] = api_key
+    headers = _get_api_headers()
 
     url = f"https://api.financialdatasets.ai/financial-metrics/?ticker={ticker}&report_period_lte={end_date}&limit={limit}&period={period}"
-    response = requests.get(url, headers=headers)
+    response = session.get(url, headers=headers, timeout=DEFAULT_TIMEOUT)
     if response.status_code != 200:
         raise Exception(f"Error fetching data: {ticker} - {response.status_code} - {response.text}")
 
@@ -98,9 +106,7 @@ def search_line_items(
 ) -> list[LineItem]:
     """Fetch line items from API."""
     # If not in cache or insufficient data, fetch from API
-    headers = {}
-    if api_key := os.environ.get("FINANCIAL_DATASETS_API_KEY"):
-        headers["X-API-KEY"] = api_key
+    headers = _get_api_headers()
 
     url = "https://api.financialdatasets.ai/financials/search/line-items"
 
@@ -111,7 +117,7 @@ def search_line_items(
         "period": period,
         "limit": limit,
     }
-    response = requests.post(url, headers=headers, json=body)
+    response = session.post(url, headers=headers, json=body, timeout=DEFAULT_TIMEOUT)
     if response.status_code != 200:
         raise Exception(f"Error fetching data: {ticker} - {response.status_code} - {response.text}")
     data = response.json()
@@ -142,9 +148,7 @@ def get_insider_trades(
             return filtered_data
 
     # If not in cache or insufficient data, fetch from API
-    headers = {}
-    if api_key := os.environ.get("FINANCIAL_DATASETS_API_KEY"):
-        headers["X-API-KEY"] = api_key
+    headers = _get_api_headers()
 
     all_trades = []
     current_end_date = end_date
@@ -155,7 +159,7 @@ def get_insider_trades(
             url += f"&filing_date_gte={start_date}"
         url += f"&limit={limit}"
         
-        response = requests.get(url, headers=headers)
+        response = session.get(url, headers=headers, timeout=DEFAULT_TIMEOUT)
         if response.status_code != 200:
             raise Exception(f"Error fetching data: {ticker} - {response.status_code} - {response.text}")
         
@@ -205,9 +209,7 @@ def get_company_news(
             return filtered_data
 
     # If not in cache or insufficient data, fetch from API
-    headers = {}
-    if api_key := os.environ.get("FINANCIAL_DATASETS_API_KEY"):
-        headers["X-API-KEY"] = api_key
+    headers = _get_api_headers()
 
     all_news = []
     current_end_date = end_date
@@ -218,7 +220,7 @@ def get_company_news(
             url += f"&start_date={start_date}"
         url += f"&limit={limit}"
         
-        response = requests.get(url, headers=headers)
+        response = session.get(url, headers=headers, timeout=DEFAULT_TIMEOUT)
         if response.status_code != 200:
             raise Exception(f"Error fetching data: {ticker} - {response.status_code} - {response.text}")
         
