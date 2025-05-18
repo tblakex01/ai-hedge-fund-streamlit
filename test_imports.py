@@ -54,11 +54,11 @@ def main():
     
     # Print summary
     print(f"\nImport testing completed: {success_count}/{len(import_statements)} imports successful")
-    
     if success_count == len(import_statements):
-        print("\n✅ All imports working correctly!")
+        print("\nAll imports working correctly!")
     else:
-        print(f"\n⚠️ {len(import_statements) - success_count} imports still have issues")
+        failed = len(import_statements) - success_count
+        print(f"\nWARNING: {failed} imports failed.")
 
 if __name__ == "__main__":
     main()
