@@ -9,6 +9,7 @@ sys.modules.setdefault("requests", mock.MagicMock())
 
 import src.tools.api as api
 
+
 class TestAPIUtils(unittest.TestCase):
     def test_get_api_headers_with_key(self):
         with mock.patch.dict(os.environ, {"FINANCIAL_DATASETS_API_KEY": "abc"}):
@@ -28,6 +29,7 @@ class TestAPIUtils(unittest.TestCase):
             args, kwargs = mock_session.get.call_args
             self.assertIn("timeout", kwargs)
             self.assertEqual(kwargs["headers"], {"X-API-KEY": "k"})
+
 
 if __name__ == "__main__":
     unittest.main()
