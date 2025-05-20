@@ -78,7 +78,7 @@ ANALYST_ORDER = [(config["display_name"], key) for key, config in sorted(ANALYST
 # This map is precomputed for efficiency and includes a special entry for "Risk Management"
 # to handle cases where this category needs to be referenced explicitly.
 ANALYST_ORDER_MAP = {display: idx for idx, (display, _) in enumerate(ANALYST_ORDER)}
-ANALYST_ORDER_MAP["Risk Management"] = len(ANALYST_ORDER)
+ANALYST_ORDER_MAP[RISK_MANAGEMENT_DISPLAY] = len(ANALYST_ORDER)
 
 
 def get_analyst_nodes():
