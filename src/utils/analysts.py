@@ -74,7 +74,9 @@ ANALYST_CONFIG = {
 # Derive ANALYST_ORDER from ANALYST_CONFIG for backwards compatibility
 ANALYST_ORDER = [(config["display_name"], key) for key, config in sorted(ANALYST_CONFIG.items(), key=lambda x: x[1]["order"])]
 
-# Precompute a mapping for quick lookups when sorting analyst output
+# Precompute a mapping for quick lookups when sorting analyst output.
+# This map is precomputed for efficiency and includes a special entry for "Risk Management"
+# to handle cases where this category needs to be referenced explicitly.
 ANALYST_ORDER_MAP = {display: idx for idx, (display, _) in enumerate(ANALYST_ORDER)}
 ANALYST_ORDER_MAP["Risk Management"] = len(ANALYST_ORDER)
 
