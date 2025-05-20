@@ -13,7 +13,10 @@ class TestDisplayUtils(unittest.TestCase):
         fake_colorama = types.SimpleNamespace(Fore=fore, Style=style)
         fake_tabulate = lambda *args, **kwargs: "table"
         fake_tabulate_mod = types.SimpleNamespace(tabulate=fake_tabulate)
-        fake_analysts = types.SimpleNamespace(ANALYST_ORDER=[("Ben Graham", "bg"), ("Bill Ackman", "ba")])
+        fake_analysts = types.SimpleNamespace(
+            ANALYST_ORDER=[("Ben Graham", "bg"), ("Bill Ackman", "ba")],
+            ANALYST_ORDER_MAP={"Ben Graham": 0, "Bill Ackman": 1, "Risk Management": 2},
+        )
         self.patches = [
             mock.patch.dict(
                 sys.modules,
