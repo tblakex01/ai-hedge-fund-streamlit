@@ -21,9 +21,12 @@ class TestAgentProgress(unittest.TestCase):
                 "rich.table": types.SimpleNamespace(Table=lambda **_: fake_table),
                 "rich.style": types.SimpleNamespace(Style=lambda **_: fake_style),
                 "rich.text": types.SimpleNamespace(Text=lambda: fake_text),
+                "rich.control": types.SimpleNamespace(Control=lambda: object()),
+                "rich.protocol": types.SimpleNamespace(RenderableType=object),
             },
         )
         self.patcher.start()
+        sys.modules.pop("src.utils.progress", None)
         self.progress_mod = importlib.import_module("src.utils.progress")
         self.progress = self.progress_mod.AgentProgress()
 
