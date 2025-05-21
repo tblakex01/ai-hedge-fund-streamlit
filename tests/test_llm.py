@@ -11,7 +11,10 @@ sys.modules.setdefault("rich.table", mock.MagicMock())
 sys.modules.setdefault("rich.style", mock.MagicMock())
 sys.modules.setdefault("rich.text", mock.MagicMock())
 
-from src.utils.llm import create_default_response, extract_json_from_deepseek_response
+from src.utils.llm import (  # noqa: E402
+    create_default_response,
+    extract_json_from_deepseek_response,
+)
 
 
 class DummyModel:
@@ -20,7 +23,13 @@ class DummyModel:
             setattr(self, k, v)
 
 
-DummyModel.model_fields = {"name": types.SimpleNamespace(annotation=str), "value": types.SimpleNamespace(annotation=float), "count": types.SimpleNamespace(annotation=int), "data": types.SimpleNamespace(annotation=dict), "label": types.SimpleNamespace(annotation=Literal["A", "B"])}
+DummyModel.model_fields = {
+    "name": types.SimpleNamespace(annotation=str),
+    "value": types.SimpleNamespace(annotation=float),
+    "count": types.SimpleNamespace(annotation=int),
+    "data": types.SimpleNamespace(annotation=dict),
+    "label": types.SimpleNamespace(annotation=Literal["A", "B"]),
+}
 
 
 class TestLLMUtils(unittest.TestCase):
@@ -58,17 +67,49 @@ class TestLLMUtils(unittest.TestCase):
             get_model_info=lambda name: types.SimpleNamespace(has_json_mode=lambda: True),
             get_model=lambda *args, **kwargs: FakeLLM(),
         )
-        with mock.patch.dict(sys.modules, {"src.llm.models": fake_models_mod}), mock.patch.object(llm_module.progress, "update_status"):
+        with (
+            mock.patch.dict(
+                sys.modules,
+                {"src.llm.models": fake_models_mod},
+            ),
+            mock.patch.object(llm_module.progress, "update_status"),
+        ):
             factory_called = {}
 
             def factory():
                 factory_called["called"] = True
                 return DummyModel(name="d", value=1.0, count=1, data={}, label="A")
 
-            result = llm_module.call_llm("prompt", "model", "provider", DummyModel, default_factory=factory)
+            result = llm_module.call_llm(
+                "prompt",
+                "model",
+                "provider",
+                DummyModel,
+                default_factory=factory,
+            )
 
         self.assertTrue(factory_called.get("called"))
         self.assertEqual(result.name, "d")
+
+    def test_call_llm_missing_model(self):
+        from src.utils import llm as llm_module
+
+        fake_models_mod = types.SimpleNamespace(
+            get_model_info=lambda name: None,
+            get_model=lambda *args, **kwargs: object(),
+        )
+
+        with (
+            mock.patch.dict(sys.modules, {"src.llm.models": fake_models_mod}),
+            mock.patch.object(
+                llm_module.progress,
+                "update_status",
+            ),
+        ):
+            with self.assertRaises(ValueError):
+                llm_module.call_llm("p", None, "p", DummyModel)
+            with self.assertRaises(ValueError):
+                llm_module.call_llm("p", "m", None, DummyModel)
 
 
 if __name__ == "__main__":
