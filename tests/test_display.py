@@ -45,6 +45,17 @@ class TestDisplayUtils(unittest.TestCase):
         sorted_signals = self.display.sort_agent_signals(signals)
         self.assertEqual(sorted_signals[0][0], "Ben Graham")
 
+    def test_sort_agent_signals_unknown(self):
+        signals = [
+            ["Unknown Analyst", "", "", ""],
+            ["Ben Graham", "", "", ""],
+        ]
+        sorted_signals = self.display.sort_agent_signals(signals)
+        # Known analyst should come first
+        self.assertEqual(sorted_signals[0][0], "Ben Graham")
+        # Unknown analyst falls back to end
+        self.assertEqual(sorted_signals[1][0], "Unknown Analyst")
+
     def test_format_backtest_row(self):
         row = self.display.format_backtest_row("2024-01-01", "AAPL", "BUY", 10, 1.0, 10, 10.0, 1, 0, 0)
         self.assertEqual(row[0], "2024-01-01")
