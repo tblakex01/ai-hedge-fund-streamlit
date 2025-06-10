@@ -13,7 +13,10 @@ class TestDisplayUtils(unittest.TestCase):
         fake_colorama = types.SimpleNamespace(Fore=fore, Style=style)
         fake_tabulate = lambda *args, **kwargs: "table"
         fake_tabulate_mod = types.SimpleNamespace(tabulate=fake_tabulate)
-        fake_analysts = types.SimpleNamespace(ANALYST_ORDER=[("Ben Graham", "bg"), ("Bill Ackman", "ba")])
+        fake_analysts = types.SimpleNamespace(
+            ANALYST_ORDER=[("Ben Graham", "bg"), ("Bill Ackman", "ba")],
+            ANALYST_ORDER_MAP={"Ben Graham": 0, "Bill Ackman": 1, "Risk Management": 2},
+        )
         self.patches = [
             mock.patch.dict(
                 sys.modules,
@@ -41,6 +44,17 @@ class TestDisplayUtils(unittest.TestCase):
         ]
         sorted_signals = self.display.sort_agent_signals(signals)
         self.assertEqual(sorted_signals[0][0], "Ben Graham")
+
+    def test_sort_agent_signals_unknown(self):
+        signals = [
+            ["Unknown Analyst", "", "", ""],
+            ["Ben Graham", "", "", ""],
+        ]
+        sorted_signals = self.display.sort_agent_signals(signals)
+        # Known analyst should come first
+        self.assertEqual(sorted_signals[0][0], "Ben Graham")
+        # Unknown analyst falls back to end
+        self.assertEqual(sorted_signals[1][0], "Unknown Analyst")
 
     def test_format_backtest_row(self):
         row = self.display.format_backtest_row("2024-01-01", "AAPL", "BUY", 10, 1.0, 10, 10.0, 1, 0, 0)
