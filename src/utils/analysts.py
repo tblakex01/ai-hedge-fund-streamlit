@@ -93,6 +93,10 @@ ANALYST_ORDER_MAP[RISK_MANAGEMENT_DISPLAY] = len(ANALYST_ORDER)
 ANALYST_ORDER_MAP = {display: idx for idx, (display, _) in enumerate(ANALYST_ORDER)}
 ANALYST_ORDER_MAP["Risk Management"] = len(ANALYST_ORDER)
 
+# Precompute a mapping for quick lookups when sorting analyst output
+ANALYST_ORDER_MAP = {display: idx for idx, (display, _) in enumerate(ANALYST_ORDER)}
+ANALYST_ORDER_MAP["Risk Management"] = len(ANALYST_ORDER)
+
 
 def get_analyst_nodes():
     """Get the mapping of analyst keys to their (node_name, agent_func) tuples."""
